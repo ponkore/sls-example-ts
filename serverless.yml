@@ -1,0 +1,108 @@
+service:
+  name: ponkore-service-ts-sample
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: us-east-1
+  stage: dev
+  stackTags:
+    category: admin
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource: "arn:aws:s3:::form-response"
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+        - s3:DeleteObject
+      Resource: "arn:aws:s3:::form-response/*"
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: "arn:aws:dynamodb:*:*:table/*"
+
+functions:
+  listFiles:
+    handler: handler.listFiles
+    timeout: 30
+    description: フォルダ配下のファイル一覧を取得する。
+    memorysize: 512
+    events:
+      - http:
+          method: get
+          path: files/{folder}
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+  readFile:
+    handler: handler.readFile
+    timeout: 30
+    description: ファイルの内容を取得する。
+    memorysize: 512
+    events:
+      - http:
+          method: get
+          path: files/{folder}/{item}
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+  # addFile は直接 S3 に put するが、SLS でどう記述するか？
+  # addFile:
+  #   handler: handler.addFile
+  #   timeout: 30
+  #   description: ファイルをアップロードする。
+  #   memorysize: 512
+  #   events:
+  #     - http:
+  #         method: put
+  #         path: files/{folder}/{item}
+  #         cors: true
+  deleteFiles:
+    handler: handler.deleteFiles
+    timeout: 30
+    description: ファイル(複数)を削除する。(ファイル名(キー)はパラメータで渡す)
+    memorysize: 512
+    events:
+      - http:
+          method: delete
+          path: files/{folder}
+          cors:
+            origins:
+              - '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+
+# S3 に put するために下記記述が必要と思われる
+# resources:
+#   Resources:
+#     PonkoreBucket002:
+#       Type: AWS::S3::Bucket
+#       Properties:
+#         BucketName: ponkore-form-response
+#         AccessControl: PublicReadWrite
+#         WebsiteConfiguration:
+#           IndexDocument: index.html
+#           ErrorDocument: error.html

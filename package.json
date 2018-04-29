@@ -8,7 +8,9 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "0.0.22",
+    "@types/aws-sdk": "^2.7.0",
     "@types/node": "^8.0.57",
+    "serverless-offline": "^3.20.3",
     "serverless-webpack": "^4.0.0",
     "ts-loader": "^2.3.7",
     "typescript": "^2.5.2",

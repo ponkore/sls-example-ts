@@ -10,7 +10,10 @@ let s3 = new AWS.S3({
 });
 
 export const listFiles: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
-  s3.listObjects((err, data) => {
+  let param: AWS.S3.ListObjectsRequest = {
+    Bucket: 'ponkore-bucket-001'
+  };
+  s3.listObjects(param, (err, data) => {
     if (err) {
       console.log('listFIles error=' + err.statusCode + ',message=' + err.message);
       const response = {
@@ -24,14 +27,15 @@ export const listFiles: Handler = (event: APIGatewayEvent, context: Context, cb:
       };
       cb(err, null);
     } else {
-      console.log('data=' + JSON.stringify(data));
+      let listResults = data['Contents'];
+      listResults.map(d => ({ Key: d['Key'], LastModified: d['LastModified'] }));
+      let list = listResults;
       const response = {
         statusCode: 200,
         headers: { "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify({
           message: 'Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!',
-          input: event,
-          list: ["ab", "cd", "ef"]
+          list: listResults
         }),
       };
       cb(null, response);

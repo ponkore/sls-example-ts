@@ -27,7 +27,7 @@ it('first test', () => {
   let event = createEvent({
     httpMethod: 'GET',
     pathParameters: {
-      "folder": "hoge"
+      "folder": "masao27190"
     },
     queryStringParameters: null,
     body: null
@@ -43,8 +43,8 @@ it('first test', () => {
     expect(data['headers']).toEqual({ "Access-Control-Allow-Origin": "*" });
     let body = JSON.parse(data['body']);
     expect(body).not.toBeNull();
-    expect(body['message']).not.toBeUndefined();
-    expect(body['message']).toBe('ok');
+    expect(body['status']).toBe('ok');
+    expect(body['message']).toBe('');
     expect(body['list']).not.toBeUndefined();
   });
 });

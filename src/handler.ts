@@ -9,91 +9,72 @@ let s3 = new AWS.S3({
   region: 'us-east-1',
 });
 
-export const listFiles: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
-  let param: AWS.S3.ListObjectsRequest = {
-    Bucket: 'ponkore-bucket-001'
+const BUCKET_NAME = 'ponkore-bucket-001';
+
+const createResponse = (status: string, message: string, data: any) => {
+  let body = Object.assign({
+    status: status,
+    message: message
+  }, data);
+  return {
+    statusCode: 200,
+    headers: { "Access-Control-Allow-Origin": "*" },
+    body: JSON.stringify(body)
   };
-  s3.listObjects(param, (err, data) => {
-    if (err) {
-      console.log('listFIles error=' + err.statusCode + ',message=' + err.message);
-      const response = {
-        statusCode: 200,
-        headers: { "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({
-          message: 'ERROR!!!' + err.message,
-          list: []
-        }),
-      };
-      cb(err, null);
-    } else {
-      let listResults = data['Contents'];
-      listResults.map(d => ({ Key: d['Key'], LastModified: d['LastModified'] }));
-      let list = listResults;
-      const response = {
-        statusCode: 200,
-        headers: { "Access-Control-Allow-Origin": "*" },
-        body: JSON.stringify({
-          message: 'ok',
-          list: listResults
-        }),
-      };
-      cb(null, response);
-    }
-  });
+}
+
+export const listFiles: Handler = async (event: APIGatewayEvent, context: Context, cb: Callback) => {
+  let folder = event.pathParameters['folder'];
+  let param: AWS.S3.ListObjectsRequest = {
+    Bucket: BUCKET_NAME,
+    Prefix: folder + '/'
+  };
+  let data = await s3.listObjects(param).promise()
+    .catch(err => {
+      cb(null, createResponse('err', 's3.listObjects error', { error: err }));
+      throw (err);
+    });
+  if (data['Contents'] === undefined) {
+    cb(null, createResponse('err', 'data[Contents] is undefined', {}));
+    return;
+  }
+  let list = data['Contents'].map(d => ({ Key: d['Key'], LastModified: d['LastModified'] }));
+  cb(null, createResponse('ok', '', { list: list }));
 }
 
 export const readFile: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
-  const response = {
-    statusCode: 200,
-    headers: { "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify({
-      message: 'Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!',
-      input: event,
-      list: ["ab", "cd", "ef"]
-    }),
-  };
-  cb(null, response);
+  cb(null, createResponse('ok', '', { data: {} }));
 }
 
-export const deleteFiles: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
-  const response = {
-    statusCode: 200,
-    headers: { "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify({
-      message: 'Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!',
-      input: event,
-      list: ["ab", "cd", "ef"]
-    }),
-  };
-  cb(null, response);
-}
-
-export const addFile: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
-  let path = event.pathParameters;
-  let body = event.body;
-  console.log(`event=${event}`);
-  console.log(`body size=` + body.length);
+export const deleteFiles: Handler = async (event: APIGatewayEvent, context: Context, cb: Callback) => {
+  let folder = event.pathParameters['folder'];
+  let filename = event.pathParameters['filename'];
   const params = {
-    Bucket: 'ponkore-bucket-001',
-    Key: 'masao27190/fuga',
-    ContentType: 'text/plain',
-    Body: event.body
+    Bucket: BUCKET_NAME,
+    Key: `${folder}/${filename}`,
   };
-  const response = {
-    statusCode: 200,
-    headers: { "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify({
-      message: 'addFile ok',
-    }),
+  await s3.deleteObject(params).promise()
+    .catch(err => {
+      cb(null, createResponse('err', 's3.deleteObject error', { error: err }));
+      throw (err);
+    });
+  cb(null, createResponse('ok', '', { data: {} }));
+}
+
+export const addFile: Handler = async (event: APIGatewayEvent, context: Context, cb: Callback) => {
+  let folder = event.pathParameters['folder'];
+  let filename = event.pathParameters['filename'];
+  let body = event.body; // TODO: decode
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: `${folder}/${filename}`,
+    ContentType: 'application/octet-binary',
+    Body: body
   };
-  s3.putObject(params, (err, result) => {
-    if (err) {
-      console.log(`err=${err}`);
-      cb(err, null);
-    } else {
-      console.log(`result=${result}`);
-      console.log(`response=${response}`);
-      cb(null, response);
-    }
-  });
+  await s3.putObject(params).promise()
+    .catch(err => {
+      cb(null, createResponse('err', 's3.putObject error', { error: err }));
+      throw (err);
+    });
+  cb(null, createResponse('ok', '', { data: {} }));
 }

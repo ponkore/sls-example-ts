@@ -44,7 +44,7 @@ it('first test', () => {
     let body = JSON.parse(data['body']);
     expect(body).not.toBeNull();
     expect(body['message']).not.toBeUndefined();
-    expect(body['message']).toBe('Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!');
+    expect(body['message']).toBe('ok');
     expect(body['list']).not.toBeUndefined();
   });
 });

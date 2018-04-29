@@ -21,7 +21,6 @@ export const listFiles: Handler = (event: APIGatewayEvent, context: Context, cb:
         headers: { "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify({
           message: 'ERROR!!!' + err.message,
-          input: event,
           list: []
         }),
       };
@@ -34,7 +33,7 @@ export const listFiles: Handler = (event: APIGatewayEvent, context: Context, cb:
         statusCode: 200,
         headers: { "Access-Control-Allow-Origin": "*" },
         body: JSON.stringify({
-          message: 'Go Serverless Webpack (Typescript) v1.0! Your function executed successfully!',
+          message: 'ok',
           list: listResults
         }),
       };

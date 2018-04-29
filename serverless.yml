@@ -50,7 +50,6 @@ functions:
           method: get
           path: files/{folder}/{item}
           cors: true
-  # addFile は直接 S3 に put するが、SLS でどう記述するか？
   addFile:
     handler: handler.addFile
     timeout: 30

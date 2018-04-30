@@ -7,9 +7,21 @@ const S3 = new AWS.S3({
 
 const BUCKET_NAME = 'ponkore-bucket-001';
 
-const createResponse = (status: string, message: string, data: any) => {
+const ok = (data: any) => {
   let body = Object.assign({
-    status: status,
+    status: 'ok',
+    message: ''
+  }, data);
+  return {
+    statusCode: 200,
+    headers: { "Access-Control-Allow-Origin": "*" },
+    body: JSON.stringify(body)
+  };
+}
+
+const err = (message: string, data: any) => {
+  let body = Object.assign({
+    status: 'err',
     message: message
   }, data);
   return {
@@ -28,17 +40,17 @@ export const listFiles: Handler = (event: APIGatewayEvent, context: Context, cb:
   S3.listObjects(param).promise()
     .then(data => {
       if (data['Contents'] === undefined) {
-        cb(null, createResponse('err', 'data[Contents] is undefined', {}));
+        cb(null, err('data[Contents] is undefined', {}));
         return;
       }
       let list = data['Contents'].map(d => ({ Key: d['Key'], LastModified: d['LastModified'] }));
-      cb(null, createResponse('ok', '', { list: list }));
+      cb(null, ok({ list: list }));
     })
-    .catch(err => cb(null, createResponse('err', 's3.listObjects error', { error: err })));
+    .catch(err => cb(null, err('s3.listObjects error', { error: err })));
 }
 
 export const readFile: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
-  cb(null, createResponse('ok', '', { data: {} }));
+  cb(null, ok({ data: {} }));
 }
 
 export const deleteFiles: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
@@ -49,8 +61,8 @@ export const deleteFiles: Handler = (event: APIGatewayEvent, context: Context, c
     Key: `${folder}/${filename}`,
   };
   S3.deleteObject(params).promise()
-    .then(data => cb(null, createResponse('ok', '', { data: data })))
-    .catch(err => cb(null, createResponse('err', 's3.deleteObject error', { error: err })));
+    .then(data => cb(null, ok({ data: data })))
+    .catch(err => cb(null, err('s3.deleteObject error', { error: err })));
 }
 
 export const addFile: Handler = (event: APIGatewayEvent, context: Context, cb: Callback) => {
@@ -64,6 +76,6 @@ export const addFile: Handler = (event: APIGatewayEvent, context: Context, cb: C
     Body: body
   };
   S3.putObject(params).promise()
-    .then(data => cb(null, createResponse('ok', '', { data: data })))
-    .catch(err => cb(null, createResponse('err', 's3.putObject error', { error: err })));
+    .then(data => cb(null, ok({ data: data })))
+    .catch(err => cb(null, err('s3.putObject error', { error: err })));
 }

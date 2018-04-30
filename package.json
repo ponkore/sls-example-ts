@@ -13,7 +13,7 @@
     "@types/node": "^8.0.57",
     "jest": "^22.4.3",
     "serverless-offline": "^3.20.3",
-    "serverless-webpack": "^4.0.0",
+    "serverless-webpack": "^4.4.0",
     "ts-jest": "^22.4.4",
     "ts-loader": "^2.3.7",
     "typescript": "^2.5.2",

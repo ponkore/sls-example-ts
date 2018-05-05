@@ -70,33 +70,3 @@ functions:
           method: delete
           path: files/{folder}/{item}
           cors: true
-  listIdeas:
-    handler: handler.listIdeas
-    timeout: 30
-    description: Idea一覧を返す
-    memorysize: 512
-    events:
-      - http:
-          method: get
-          path: idea/list
-          cors: true
-  showIdea:
-    handler: handler.showIdea
-    timeout: 30
-    description: Idea Show Page データを返す
-    memorysize: 512
-    events:
-      - http:
-          method: get
-          path: idea/show
-          cors: true
-  login:
-    handler: handler.login
-    timeout: 30
-    description: ログイン(ユーザー認証)処理を行う
-    memorysize: 512
-    events:
-      - http:
-          method: get
-          path: login
-          cors: true

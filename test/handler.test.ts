@@ -1,7 +1,7 @@
 import AWS = require('aws-sdk');
 import { APIGatewayEvent, Callback, Context, Handler } from 'aws-lambda';
 import { readFileSync, existsSync } from 'fs';
-import handler = require('./handler');
+import handler = require('../handler');
 
 const configureAWS = () => {
   const HOME = process.env['HOME'];
